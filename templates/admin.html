@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title%}Admin-Seite{% endblock %}
+{% block content%}
+<div class="container">
+    <div>
+        <h1>Post your post</h1>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <p>{{ form.headline.label }}</p>
+            <p>{{ form.headline() }}</p>
+            <p>{{ form.textarea.label }}</p>
+            <p>{{ form.textarea(rows='15',cols='50') }}</p>
+            <p>{{ form.submit() }}</p>
+        </form>
+    </div>
+    <div>
+        {% for post in values %}
+        <p><h2>{{post.headline}}</h2>
+        <p>{{post.textarea}}</p>
+        <p>{{post.date_created}}</p>
+        <form action="{{url_for('auth.delete', post_id=post._id)}}", method="DELETE">
+            <input type="submit", value="Delete post">
+        </form>
+    {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
