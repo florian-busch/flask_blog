@@ -2,26 +2,27 @@
 {% block title%}Admin-Seite{% endblock %}
 {% block content%}
 <div class="container">
-    <div>
+    <div class="item">
         <h1>Post your post</h1>
-        <form method="POST">
+        <form method="POST" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <p>{{ form.headline.label }}</p>
             <p>{{ form.headline() }}</p>
+            <p>{{ form.snippet.label }}</p>
+            <p>{{ form.snippet()  }}</p>
             <p>{{ form.textarea.label }}</p>
             <p>{{ form.textarea(rows='15',cols='50') }}</p>
+            <p>{{ form.image.label }}</p>
+            <p>{{ form.image() }}</p>
             <p>{{ form.submit() }}</p>
         </form>
     </div>
-    <div>
-        {% for post in values %}
-        <p><h2>{{post.headline}}</h2>
-        <p>{{post.textarea}}</p>
-        <p>{{post.date_created}}</p>
-        <form action="{{url_for('auth.delete', post_id=post._id)}}", method="DELETE">
-            <input type="submit", value="Delete post">
-        </form>
-    {% endfor %}
+    <div class="item">
+        <div class="postContainer">
+        {% with posts=posts %}
+            {% include "single_posts.html" %}
+        {% endwith %}
+        </div>
     </div>
 </div>
 {% endblock %}

@@ -1,3 +1,7 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+}
+
 header {
     padding-left: 10px;
     padding-right: 10px;
@@ -36,16 +40,47 @@ li:hover {
 
     
 .container {
-    width: 50%;
     display: flex;
-    flex-direction: column;
-    justify-content: left;
+    width: 80%;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-self: center;
     border-bottom: 1px solid black;
-    gap: 10px;
+    gap: 20px;
 }
 
 .item {
-    background: lightgrey;
+    flex: 50%;
+    border-radius: 25px;
+    max-width: 50%;
+    flex-grow: 0;
+    padding-left: 10px;
+    overflow: visible;
+    text-overflow: ellipsis;
+
+}
+
+.postContainer {
+    max-width: 1080px;
+    display: flex;
+    width: 80%;
+    flex-direction: column;
+    justify-self: center;
+    border-bottom: 1px solid black;
+    gap: 20px;
+}
+
+.singlePost {
+    flex: 50%;
+    background: lightgray;
+    border-radius: 25px;
+    box-shadow: 5px 5px darkgray;
+    padding-left: 10px;
+    overflow: visible;
+    text-overflow: ellipsis;
+    padding: 20px;
+    margin: 20px;
+    
 }
 
 #footer {

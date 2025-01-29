@@ -1,0 +1,20 @@
+{% for post in posts %}
+    <div class="singlePost">
+        {% if post.image != '' %}
+        <div>
+        <img src="{{ url_for('static', filename='/images/' + post.image) }}" height="240px" width="300px">
+        </div>
+        {% endif %}
+        <div>
+        <h2>{{post.headline}}</h2>
+        <p>{{post.snippet}}</p>
+        <p>{{post.textarea}}</p>
+        <p>{{post.date_created}}</p>
+        {% if url_for(request.endpoint) == "/admin" %}
+        <form action="{{url_for('auth.delete', post_id=post._id)}}", method="DELETE">
+            <input type="submit", value="Delete post">
+        </form>
+        {% endif %}
+        </div>
+    </div>
+{% endfor %}

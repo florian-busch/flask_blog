@@ -1,8 +1,0 @@
-{% from "_formhelpers.html" import render_field %}
-<form action=/post_form, method=POST>
-  <dl>
-    {{ render_field(form.headline) }}
-    {{ render_field(form.textarea) }}
-  </dl>
-  <p><input type=submit value=submit>
-</form>

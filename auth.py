@@ -3,7 +3,9 @@ from forms import PostForm, LoginForm, SignupForm
 from models import db, Posts, Users
 from sqlalchemy import exc
 from werkzeug.security import check_password_hash, generate_password_hash
-
+from werkzeug.utils import secure_filename
+import os
+from flask import current_app as app
 
 auth = Blueprint("auth", __name__, template_folder="../templates")
 
@@ -12,14 +14,11 @@ auth = Blueprint("auth", __name__, template_folder="../templates")
 @auth.route("/delete/<post_id>")
 def delete(post_id):
     if 'user_id' in session:
-        form = PostForm()
         Posts.query.filter_by(_id=post_id).delete()
         db.session.commit()
-        return render_template("admin.html",
-                                form=form,
-                                message="Post deleted",
-                                values=Posts.query.all()
-                                )
+        #redirect user to admin page after deletion
+        return redirect(request.referrer)
+
     else:
         flash('Redirected to login')
         return redirect(url_for("auth.login"))
@@ -29,34 +28,58 @@ def delete(post_id):
 def post():
     headline = None
     textarea = None
+    snippet = None
+    image = None
     form = PostForm()
+
+     #manage posts and file upload from admin page
+    if form.validate_on_submit():
+        #check if user is logged in
+        if 'user_id' in session:
+            #manage upload of posts without attached files
+            if form.image.data.filename == '':
+                post = Posts(form.headline.data, form.textarea.data, form.snippet.data, form.image.data.filename)
+                db.session.add(post)
+                db.session.commit()
+                return render_template("admin.html",
+                    form = form,
+                    posts=Posts.query.all()
+                    )
+            
+            #manage uploads of posts with file
+            if request.files['image']:
+                image = request.files['image']
+                filename = secure_filename(form.image.data.filename)
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+
+                post = Posts(form.headline.data, form.textarea.data, form.snippet.data, filename)
+                db.session.add(post)
+                db.session.commit()
+                return render_template("admin.html",
+                                    form = form,
+                                    posts=Posts.query.all()
+                                    )
+        else:
+            flash('Redirected to login')
+            return redirect("login", 302) 
+
+
     if request.method=="GET":
         if 'user_id' in session:
             return render_template("admin.html",
                                 headline = headline,
                                 textarea = textarea,
+                                snippet = snippet,
+                                image = image,
                                 form = form,
-                                values=Posts.query.all()
+                                #if user is logged in, show logout button in nav
+                                user = True,
+                                posts=Posts.query.all()
                                 )
         else:
             flash('Redirected to login')
             return redirect("login", 302)
-
-                            
-    #validate form
-    if form.validate_on_submit():
-        if 'user_id' in session:
-            post = Posts(form.headline.data, form.textarea.data)
-            form.headline.data = ""
-            form.textarea.data = ""
-            db.session.add(post)
-            db.session.commit()
-            return render_template("admin.html",
-                                form = form,
-                                message="Post saved",
-                                values=Posts.query.all()
-                                )
-    
+        
 
 #user signup
 @auth.route("/signup", methods=["GET", "POST"])
@@ -64,10 +87,9 @@ def signup():
     form = SignupForm()
     if request.method=="GET":
         return render_template("signup.html",
-                            form = form,
-                            message="User registered",
+                            form = form
                             )
-    #validate form
+    
     if form.validate_on_submit():
         username = form.username.data
         password = form.password.data
@@ -87,13 +109,14 @@ def signup():
                 form.password.data = ""
                 db.session.add(user)
                 db.session.commit()
-                return render_template("signup.html",
-                                    form = form,
-                                    message="User registered",
+                #TODO: redirecting to login after signup not working yet
+                return render_template("login.html",
+                                    form = LoginForm()
                                     )
             #db.IntegrityError did not work so changed for exc
+            #TODO: flash does not get shown in frontend yet
             except exc.IntegrityError:
-                error = f"User {username} already exists"
+                flash(f"User {username} already exists")
         else:
             return render_template("login.html",
                                form = LoginForm())
@@ -147,4 +170,4 @@ def login():
 def logout():
     session.clear()
     flash('Logged out')
-    return redirect('login')
+    return redirect('/posts', 302)

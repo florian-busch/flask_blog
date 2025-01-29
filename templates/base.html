@@ -10,9 +10,11 @@
         <nav>
             <ul>
                 <li><a href="/">Posts</a></li>
-                <li><a href="/pictures">Pictures</a></li>
                 <li><a href="/about">About</a></li>
-                <li><a href="/impressum">Impressum</a></li>
+                {% if user %}
+                <li><a href="/logout">Logout</a></li>
+                {% endif %}
+
             </ul>
         </nav>
     </header>

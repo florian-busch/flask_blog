@@ -4,9 +4,14 @@ from models import Posts
 main = Blueprint("main", __name__, template_folder="../templates")
 
 @main.route("/", methods=["GET"])
+@main.route("/posts", methods=["GET"])
+
 def get_posts():
     try:
-        return render_template("posts.html", values=Posts.query.all())
+        return render_template("posts_overview.html",
+                               #works with values, not with posts, not sure why
+                                values=Posts.query.all()
+                                )
     except:
         return "Error retrieving Posts"
     
@@ -14,13 +19,6 @@ def get_posts():
 def about():
     try:
         return render_template("about.html")
-    except:
-        return "Error retrieving About-Site"
-
-@main.route("/pictures", methods=["GET"])
-def pictures():
-    try:
-        return render_template("pictures.html")
     except:
         return "Error retrieving About-Site"
 

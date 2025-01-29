@@ -15,7 +15,9 @@ def create_app(test_config=None):
     app.config.from_mapping(
         SQLALCHEMY_DATABASE_URI = "sqlite:///posts.sqlite3",
         SQLALCHEMY_TRACK_MODIFICATIONS = False,
-        SECRET_KEY = os.getenv("SECRET_KEY")
+        SECRET_KEY = os.getenv("SECRET_KEY"),
+        UPLOAD_FOLDER = 'static/images'
+
     )
 
     try:

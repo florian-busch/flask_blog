@@ -9,12 +9,16 @@ class Posts(db.Model):
 
     _id = db.Column("id", db.Integer, primary_key=True)
     headline = db.Column("headline", db.String(200))
+    snippet = db.Column("snippet", db.String(200))
     textarea = db.Column("text", db.String(4000))
+    image = db.Column("image", db.String(100))
     date_created = db.Column(db.DateTime, default=datetime.now())
 
-    def __init__(self, headline, textarea):
+    def __init__(self, headline, textarea, snippet, image):
         self.headline = headline
         self.textarea = textarea
+        self.snippet = snippet
+        self.image = image
 
 class Users(db.Model):
     __table_args__ = {'extend_existing': True} 
