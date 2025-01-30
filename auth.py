@@ -10,18 +10,6 @@ from flask import current_app as app
 auth = Blueprint("auth", __name__, template_folder="../templates")
 
 # #CRUD
-#deleting posts
-@auth.route("/delete/<post_id>")
-def delete(post_id):
-    if 'user_id' in session:
-        Posts.query.filter_by(_id=post_id).delete()
-        db.session.commit()
-        #redirect user to admin page after deletion
-        return redirect(request.referrer)
-
-    else:
-        flash('Redirected to login')
-        return redirect(url_for("auth.login"))
     
 #admin page and save posts to db
 @auth.route("/admin", methods=["GET", "POST"])
@@ -72,8 +60,6 @@ def post():
                                 snippet = snippet,
                                 image = image,
                                 form = form,
-                                #if user is logged in, show logout button in nav
-                                user = True,
                                 posts=Posts.query.all()
                                 )
         else:
@@ -142,31 +128,96 @@ def login():
                                 )
     #validate form
     if request.method=="POST":
-    # if form.validate_on_submit():
-        username = form.username.data
-        password = form.password.data
-        error = None
+        if form.validate_on_submit():
+            username = form.username.data
+            password = form.password.data
+            error = None
 
-        user = Users.query.filter_by(username=username).first()
+            user = Users.query.filter_by(username=username).first()
 
-        if user is None:
-            error = "Incorrect username"
-            flash(error)
+            if user is None:
+                error = "Incorrect username"
+                flash(error)
+                return redirect("login", 302)
+            elif not check_password_hash(user.password, password):
+                error = "Incorrect password"
+                flash(error)
+                return redirect("login", 302)
+
+            if error is None:
+                session.clear()
+                session["user_id"] = user["_id"]
+                return redirect("admin", 302)
+        else:
             return redirect("login", 302)
-        elif not check_password_hash(user.password, password):
-            error = "Incorrect password"
-            flash(error)
-            return redirect("login", 302)
 
-        if error is None:
-            session.clear()
-            session["user_id"] = user["_id"]
-            return redirect("admin", 302)
+#single post view for update
+@auth.route("/update_post_view/<post_id>", methods=["POST", "GET"])
+def update_post_view(post_id):
+    form = PostForm()
+    if request.method=="GET": 
+        if 'user_id' in session:
+            post = Posts.query.filter_by(_id=post_id).first()
+
+            #populate form with data from post
+            form.headline.data = post.headline
+            form.snippet.data = post.snippet
+            form.textarea.data = post.textarea
+            return render_template("update_post_view.html",
+                                form=form,
+                                post=post)
+
+        else:
+            flash('Redirected to login')
+            return redirect(url_for("auth.admin"))
+    #update post
+    if form.validate_on_submit():
+        #check if user is logged in
+        if 'user_id' in session:
+            #manage update of posts
+            post = Posts.query.filter_by(_id=post_id).first()
+            post.headline = form.headline.data
+            post.snippet = form.snippet.data
+            post.textarea = form.textarea.data
+            #TODO: works with first time upload but not with posts who already have an image
+            if request.files['image']:
+                image = request.files['image']
+                filename = secure_filename(form.image.data.filename)
+                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                post.image = form.image.data.filename
+            db.session.commit()
+            return redirect(request.referrer)
+           
+        else:
+            flash('Redirected to login')
+            return redirect("login", 302)
+        
+
+#handle update button on admin page
+@auth.route("/updateButton/<post_id>", methods=["POST", "GET"])
+def updateButton(post_id):
+    if 'user_id' in session:
+        return redirect(url_for("auth.update_post_view", post_id=post_id))
+
     else:
-        return redirect("login", 302)
+        flash('Redirected to login')
+        return redirect(url_for("auth.admin"))
+
+#deleting posts
+@auth.route("/delete/<post_id>")
+def delete(post_id):
+    if 'user_id' in session:
+        Posts.query.filter_by(_id=post_id).delete()
+        db.session.commit()
+        #redirect user to admin page after deletion
+        return redirect(request.referrer)
+
+    else:
+        flash('Redirected to login')
+        return redirect(url_for("auth.login"))
 
 #logout
-@auth.route("/logout", methods=["POST", "GET"])
+@auth.route("/logout", methods=["GET"])
 def logout():
     session.clear()
     flash('Logged out')

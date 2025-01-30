@@ -19,8 +19,9 @@
     </div>
     <div class="item">
         <div class="postContainer">
+        <!-- TODO: show only headline, snippet and image -->
         {% with posts=posts %}
-            {% include "single_posts.html" %}
+            {% include "posts_tiles.html" %}
         {% endwith %}
         </div>
     </div>

@@ -5,7 +5,6 @@ main = Blueprint("main", __name__, template_folder="../templates")
 
 @main.route("/", methods=["GET"])
 @main.route("/posts", methods=["GET"])
-
 def get_posts():
     try:
         return render_template("posts_overview.html",
