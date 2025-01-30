@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title%}Update Post{% endblock %}
+{% block content%}
+{% if post.image != '' %}
+        <div>
+            <img src="{{ url_for('static', filename='/images/' + post.image) }}" height="240px" width="300px">
+        </div>
+        {% endif %}
+            <h2>{{post.headline}}</h2>
+            <p>{{post.snippet}}</p>
+            <p>{{post.textarea}}</p>
+            <p>{{post.date_created}}</p>
+
+        <h2>Formular</h2>
+        <form action="{{url_for('auth.update_post_view', post_id=post._id)}}" method="POST" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+            <p>{{ form.headline.label }}</p>
+            <p>{{ form.headline() }}</p>
+            <p>{{ form.snippet.label }}</p>
+            <p>{{ form.snippet()  }}</p>
+            <p>{{ form.textarea.label }}</p>
+            <p>{{ form.textarea(rows='15',cols='50') }}</p>
+            <p>{{ form.image.label }}</p>
+            <p>{{ form.image() }}</p>
+            <p>{{ form.submit() }}</p>
+        </form>
+{% endblock %}
+
