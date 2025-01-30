@@ -179,12 +179,13 @@ def update_post_view(post_id):
             post.headline = form.headline.data
             post.snippet = form.snippet.data
             post.textarea = form.textarea.data
-            #TODO: works with first time upload but not with posts who already have an image
+            #TODO: problem with upload, image name gets %% characters which block later download
             if request.files['image']:
                 image = request.files['image']
                 filename = secure_filename(form.image.data.filename)
+                print(filename)
                 image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                post.image = form.image.data.filename
+                post.image = filename
             db.session.commit()
             return redirect(request.referrer)
            
