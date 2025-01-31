@@ -4,8 +4,7 @@ from models import db, Posts, Users
 from sqlalchemy import exc
 from werkzeug.security import check_password_hash, generate_password_hash
 from werkzeug.utils import secure_filename
-import os
-from flask import current_app as app
+from helper_functions import save_image
 
 auth = Blueprint("auth", __name__, template_folder="../templates")
 
@@ -24,29 +23,22 @@ def post():
     if form.validate_on_submit():
         #check if user is logged in
         if 'user_id' in session:
-            #manage upload of posts without attached files
-            if form.image.data.filename == '':
-                post = Posts(form.headline.data, form.textarea.data, form.snippet.data, form.image.data.filename)
-                db.session.add(post)
-                db.session.commit()
-                return render_template("admin.html",
-                    form = form,
-                    posts=Posts.query.all()
-                    )
-            
-            #manage uploads of posts with file
+            #manage upload of posts 
+            post = Posts(form.headline.data, form.textarea.data, form.snippet.data, form.image.data.filename)
             if request.files['image']:
-                image = request.files['image']
-                filename = secure_filename(form.image.data.filename)
-                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-
-                post = Posts(form.headline.data, form.textarea.data, form.snippet.data, filename)
-                db.session.add(post)
-                db.session.commit()
-                return render_template("admin.html",
-                                    form = form,
-                                    posts=Posts.query.all()
-                                    )
+                try:
+                    sanitized_filename = form.image.data.filename
+                    save_image(request.files['image'], sanitized_filename)
+                    post.image = sanitized_filename
+                    db.session.add(post)
+                except:
+                    print('Error saving file')
+            db.session.add(post)
+            db.session.commit()
+            return render_template("admin.html",
+                form = form,
+                posts=Posts.query.all()
+                )
         else:
             flash('Redirected to login')
             return redirect("login", 302) 
@@ -166,7 +158,6 @@ def update_post_view(post_id):
             return render_template("update_post_view.html",
                                 form=form,
                                 post=post)
-
         else:
             flash('Redirected to login')
             return redirect(url_for("auth.admin"))
@@ -179,13 +170,16 @@ def update_post_view(post_id):
             post.headline = form.headline.data
             post.snippet = form.snippet.data
             post.textarea = form.textarea.data
-            #TODO: problem with upload, image name gets %% characters which block later download
             if request.files['image']:
-                image = request.files['image']
-                filename = secure_filename(form.image.data.filename)
-                print(filename)
-                image.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                post.image = filename
+                try:
+                    sanitized_filename = form.image.data.filename
+                    save_image(request.files['image'], sanitized_filename)
+                    # filename = secure_filename(form.image.data.filename)
+                    post.image = sanitized_filename
+                    db.session.add(post)
+                except:
+                    print('Error saving file')
+            db.session.add(post)
             db.session.commit()
             return redirect(request.referrer)
            

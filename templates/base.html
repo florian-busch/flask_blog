@@ -17,11 +17,15 @@
                 {% if session['user_id'] %}
                 <li><a href="/logout">Logout</a></li>
                 {% endif %}
+                {% if not session['user_id'] %}
+                <li><a href="/login">Login</a></li>
+                {% endif %}
+                
 
             </ul>
         </nav>
     </header>
     {% block content%}{% endblock %}
-<footer id="footer">Impressum / Datenschutz / <a href="/login">Login</a></footer>
+<footer id="footer">Impressum / Datenschutz / <a href="/signup">Signup</a></footer>
 </body>
 </html>

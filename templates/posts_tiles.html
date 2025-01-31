@@ -1,0 +1,26 @@
+{% for post in posts %}
+    <div class="singlePost">
+        {% if post.image != '' %}
+        <div>
+            <img src="{{ url_for('static', filename='/images/' + post.image) }}" height="240px" width="300px">
+        </div>
+        {% endif %}
+        <div>
+            <h2>{{post.headline}}</h2>
+            <p>{{post.snippet}}</p>
+            <p>{{post.textarea}}</p>
+            <p>{{post.date_created}}</p>
+            <!-- css flex for buttons -->
+            {% if url_for(request.endpoint) == "/admin" %}
+            <div>
+                <form action="{{url_for('auth.updateButton', post_id=post._id)}}", method="UPDATE">
+                <input type="submit", value="Update post">
+            </form>
+            <form action="{{url_for('auth.delete', post_id=post._id)}}", method="DELETE">
+                <input type="submit", value="Delete post">
+            </form>
+            </div>
+        {% endif %}
+        </div>
+    </div>
+{% endfor %}
