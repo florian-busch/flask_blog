@@ -27,7 +27,7 @@ def post():
             post = Posts(form.headline.data, form.textarea.data, form.snippet.data, form.image.data.filename)
             if request.files['image']:
                 try:
-                    sanitized_filename = form.image.data.filename
+                    sanitized_filename = secure_filename(form.image.data.filename)
                     save_image(request.files['image'], sanitized_filename)
                     post.image = sanitized_filename
                     db.session.add(post)
@@ -172,9 +172,8 @@ def update_post_view(post_id):
             post.textarea = form.textarea.data
             if request.files['image']:
                 try:
-                    sanitized_filename = form.image.data.filename
+                    sanitized_filename = secure_filename(form.image.data.filename)
                     save_image(request.files['image'], sanitized_filename)
-                    # filename = secure_filename(form.image.data.filename)
                     post.image = sanitized_filename
                     db.session.add(post)
                 except:
